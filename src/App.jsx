@@ -3,6 +3,7 @@ import './App.css'
 import Home from './pages/Home'
 import Auth from './pages/Auth'
 import Dasboard from './pages/Dasboard'
+import Taskfrom from './pages/TaskForm'
 
 function App() {
 
@@ -12,6 +13,7 @@ function App() {
       <Route path='/' element={<Dasboard/>}/>
       <Route path='/home' element={<Home/>}/>
       <Route path='/login' element={<Auth/>}/>
+      <Route path='/taskform' element={<Taskfrom/>}/>
       <Route path='/register' element={<Auth insideRegister={true}/>}/>
 
 

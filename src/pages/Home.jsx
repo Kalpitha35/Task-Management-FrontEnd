@@ -1,13 +1,76 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AddTaskModal from './AddTaskModal';
+import { getAllTaskAPI ,deleteTaskAPI } from '../services/allAPI';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
+
+    const navigate = useNavigate()
     const [tasks, setTasks] = useState([]);
+    const [username, setUsername] = useState("")
+    const [alltask, setAlltask] = useState("")
+    useEffect(() => {
+        getAllTask()
+        if (sessionStorage.getItem("user")) {
+            setUsername(JSON.parse(sessionStorage.getItem("user")).username)
+
+        } else {
+            setUsername("")
+        }
+    }, [])
+
+    const getAllTask = async () => {
+        const token = sessionStorage.getItem("token");
+        if (token) {
+            const reqHeader = {
+                "Authorization": `Bearer ${token}`,
+            };
+            try {
+                const result = await getAllTaskAPI(reqHeader);
+                console.log("Fetched tasks:", result.data); // Add this line for debugging
+    
+                if (result.status === 200) {
+                    setTasks(result.data);
+                } else {
+                    console.error("Unexpected response status:", result.status);
+                }
+            } catch (err) {
+                console.error("Error during API call:", err);
+            }
+        } else {
+            console.warn("No token found in session storage");
+        }
+    };
+    
+    console.log(tasks);
+
+    const handleEditTask = (task) => {
+        navigate('/taskform', { state: { task } }); // Navigate with task data
+    };
+
+
 
     // Function to handle saving a new task
     const handleSaveTask = (task) => {
         setTasks([...tasks, task]); // Add the new task to the existing task list
     };
+
+    const deleteTask = async (id) => {
+        const token = sessionStorage.getItem("token")
+        if (token) {
+            //api call
+            const reqHeader = {
+                "Authorization": `Bearer ${token}`,
+            };
+            try {
+                await deleteTaskAPI(id,reqHeader)
+                getAllTask()
+            } catch (err) {
+                console.log(err);
+
+            }
+        }
+    }
 
     return (
         <>
@@ -31,20 +94,22 @@ const Home = () => {
                                         <p className='text-muted'>Progress: <strong>{task.progress}%</strong></p>
                                     </div>
                                     <div className='task-actions'>
-                                        <button className='btn btn-outline-primary me-2'>
-                                            <i className='fas fa-eye'></i>
+                                        {/* <button className='btn btn-outline-primary me-2'>
+                                            DELETE
+                                        </button> */}
+                                        <button  onClick={() => handleEditTask(task)} className='btn btn-outline-success me-2'>
+                                            UPDATE
                                         </button>
-                                        <button className='btn btn-outline-success me-2'>
-                                            <i className='fas fa-pen'></i>
-                                        </button>
-                                        <button className='btn btn-outline-danger'>
-                                            <i className='fas fa-trash'></i>
+                                        <button onClick={() => deleteTask(task?._id)} className='btn btn-outline-danger'>
+                                           DELETE
                                         </button>
                                     </div>
                                 </div>
+                               
                             </div>
                         ))
                     )}
+                    
                 </section>
             </div>
         </>
